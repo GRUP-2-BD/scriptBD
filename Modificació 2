@@ -1,0 +1,5 @@
+ALTER TABLE partits
+  ADD COLUMN nom_curt_candidatura VARCHAR(10) DEFAULT NULL
+    AFTER nom_curt,
+  ADD COLUMN nom_llarg_candidatura VARCHAR(50) DEFAULT NULL
+    AFTER nom_llarg;
