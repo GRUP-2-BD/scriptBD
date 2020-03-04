@@ -1,0 +1,7 @@
+ALTER TABLE provincies
+  ADD COLUMN partit_provincia VARCHAR(45) DEFAULT NULL,
+  ADD COLUMN vots_partit INT UNSIGNED
+    AFTER partit_provincia;
+    
+SELECT partit_provincia, vots_partit
+  FROM provincies;
