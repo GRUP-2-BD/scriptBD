@@ -1,0 +1,8 @@
+
+ALTER TABLE candidats 
+ADD COLUMN partit_id smallint(5) unsigned 
+AFTER candidat_id,
+ADD CONSTRAINT FK_partit FOREIGN KEY (partit_id)
+REFERENCES partits(partit_id);
+
+ 
