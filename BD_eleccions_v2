@@ -1,0 +1,136 @@
+CREATE TABLE candidats (
+  candidat_id         bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  partit_id           smallint(5) unsigned DEFAULT NULL,
+  nom                 varchar(50) DEFAULT NULL,
+  num_llista          int(11) DEFAULT NULL,
+  num_ordre           tinyint(4) DEFAULT NULL COMMENT 'Num ordre del candidatdins la llista del partit dins de la circumpscripció que es presenta.',
+  tipus               enum('T','S') DEFAULT NULL COMMENT 'T=Titular, S=Suplent',
+  provincia_id        tinyint(3) unsigned NOT NULL,
+  persona_id          int(10) unsigned NOT NULL,
+  candidatura_id      int(10) unsigned NOT NULL,
+  
+  PRIMARY KEY (candidat_id),
+  KEY fk_candidats_provincies1_idx (provincia_id),
+  KEY fk_candidats_persones1_idx (persona_id),
+  KEY fk_candidats_candidatures1_idx (candidatura_id),
+  KEY FK_partit (partit_id),
+  
+  CONSTRAINT FK_partit FOREIGN KEY (partit_id) REFERENCES partits (partit_id),
+  CONSTRAINT fk_candidats_candidatures1 FOREIGN KEY (candidatura_id) REFERENCES candidatures (candidatura_id),
+  CONSTRAINT fk_candidats_persones1 FOREIGN KEY (persona_id) REFERENCES persones (persona_id),
+  CONSTRAINT fk_candidats_provincies1 FOREIGN KEY (provincia_id) REFERENCES provincies (provincia_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE candidatures (
+  candidatura_id       int(10) unsigned NOT NULL AUTO_INCREMENT,
+  eleccio_id           tinyint(3) unsigned NOT NULL,
+  partit_id            smallint(5) unsigned NOT NULL,
+  nom_curt             varchar(50) DEFAULT NULL,
+  nom_llarg            varchar(100) DEFAULT NULL,
+  codi_acumulacio_provincia char(6) DEFAULT NULL COMMENT 'Codi de la candidatura d''acumulació a nivell provincial.',
+  codi_acumulacio_ca char(6) DEFAULT NULL COMMENT 'Codi de la candidatura d''acumulació a nivell de comunitat autònoma',
+  
+  PRIMARY KEY (candidatura_id),
+  UNIQUE KEY uk_eleccions_partits (eleccio_id,partit_id),
+  KEY idx_fk_eleccions_partits_partits (partit_id),
+  KEY idx_fk_eleccions_partits_eleccions (eleccio_id),
+  CONSTRAINT fk_eleccions_partits_eleccions FOREIGN KEY (eleccio_id) REFERENCES eleccions (eleccio_id),
+  CONSTRAINT fk_eleccions_partits_partits FOREIGN KEY (partit_id) REFERENCES partits (partit_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE comunitats_autonomes (
+  comunitat_aut_id          tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  nom                       varchar(45) DEFAULT NULL,
+  codi_ine                  char(2) NOT NULL,
+  
+  PRIMARY KEY (comunitat_aut_id),
+  UNIQUE KEY uk_com_aut_codi_ine (codi_ine)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE eleccions (
+  eleccio_id            tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  nom                   varchar(45) DEFAULT NULL,
+  any                   tinyint(4) GENERATED ALWAYS AS (year(data)) STORED COMMENT 'any el qual s''han celebrat les eleccions',
+  mes                   tinyint(2) GENERATED ALWAYS AS (month(data)) STORED COMMENT 'El mes que s''han celebrat les eleccions',
+  data                  date NOT NULL COMMENT 'Data (dia mes i any) de quan s''han celebrat les eleccions',
+  
+  PRIMARY KEY (eleccio_id),
+  UNIQUE KEY uk_eleccions_any_mes (any,mes) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE eleccions_municipis (
+  eleccio_municipi_id    int(10) unsigned NOT NULL AUTO_INCREMENT,
+  eleccio_id             tinyint(3) unsigned NOT NULL,
+  municipi_id            smallint(5) unsigned NOT NULL,
+  num_meses              smallint(5) unsigned DEFAULT NULL,
+  poblacio               int(10) unsigned DEFAULT NULL,
+  cens                   int(10) unsigned DEFAULT NULL,
+  vots_emesos            int(10) unsigned DEFAULT NULL COMMENT 'Número total de vots realitzats en el municipi',
+  vots_valids            int(10) unsigned DEFAULT NULL COMMENT 'Número de vots es que tindran en compte: vots a candidatures + vots nuls',
+  vots_candidatures      int(10) unsigned DEFAULT NULL,
+  vots_blanc             int(10) unsigned DEFAULT NULL,
+  vots_nuls              int(10) unsigned DEFAULT NULL,
+  
+  PRIMARY KEY (eleccio_municipi_id),
+  UNIQUE KEY uk_eleccions_municipis (eleccio_id,municipi_id),
+  KEY idx_fk_eleccions_municipis_eleccions (eleccio_id),
+  KEY fk_eleccions_municipis_municipis (municipi_id),
+  
+  CONSTRAINT fk_eleccions_municipis_eleccions FOREIGN KEY (eleccio_id) REFERENCES eleccions (eleccio_id),
+  CONSTRAINT fk_eleccions_municipis_municipis FOREIGN KEY (municipi_id) REFERENCES municipis (municipi_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE municipis (
+  municipi_id            smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  nom                    varchar(50) DEFAULT NULL,
+  codi_ine               char(3) NOT NULL,
+  provincia_id           tinyint(3) unsigned NOT NULL,
+  districte              char(2) DEFAULT NULL COMMENT 'Número de districte municipal , sinó el seu valor serà 99 si és el total municipal',
+  
+  PRIMARY KEY (municipi_id),
+  UNIQUE KEY uk_municipis_codi_ine (codi_ine),
+  KEY idx_fk_municipis_provincies1 (provincia_id),
+  
+  CONSTRAINT fk_municipis_provincies FOREIGN KEY (provincia_id) REFERENCES provincies (provincia_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE partits (
+  partit_id                smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  vots                     int(10) unsigned DEFAULT NULL,
+  nom_llarg                varchar(100) DEFAULT NULL,
+  nom_llarg_candidatura    varchar(50) DEFAULT NULL,
+  nom_curt                 varchar(50) DEFAULT NULL,
+  nom_curt_candidatura     varchar(10) DEFAULT NULL,
+  
+  PRIMARY KEY (partit_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE persones (
+  persona_id int(10)       unsigned NOT NULL,
+  nom                      varchar(30) DEFAULT NULL,
+  cog1                     varchar(30) DEFAULT NULL,
+  cog2                     varchar(30) DEFAULT NULL,
+  sexe                     enum('M','F') DEFAULT NULL COMMENT 'M=Masculí, F=Femení',
+  data_naixement           date DEFAULT NULL,
+  dni                      char(10) NOT NULL,
+  
+  PRIMARY KEY (persona_id),
+  UNIQUE KEY uk_candidats_dni (dni)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE provincies (
+  provincia_id              tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  nom                       varchar(45) DEFAULT NULL,
+  codi_ine                  char(2) NOT NULL,
+  comunitat_aut_id          tinyint(3) unsigned NOT NULL,
+  partit_provincia          varchar(45) DEFAULT NULL,
+  vots_partit               int(10) unsigned DEFAULT NULL,
+  
+  PRIMARY KEY (provincia_id),
+  UNIQUE KEY uk_provincies_codi_ine (codi_ine),
+  KEY idx_fk_provincies_comunitats_autonomes (comunitat_aut_id),
+  
+  CONSTRAINT fk_provincies_comunitats_autonomes FOREIGN KEY (comunitat_aut_id) REFERENCES comunitats_autonomes (comunitat_aut_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
