@@ -3,3 +3,4 @@ ALTER TABLE eleccions
   Modify column mes tinyINT(2) as (MONTH(data)) STORED COMMENT 'El mes que s''han celebrat les eleccions';
 
 Daniel García
+
