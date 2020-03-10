@@ -1,1 +1,3 @@
-
+ALTER TABLE partits 
+  ADD COLUMN vots INT UNSIGNED DEFAULT NULL
+  AFTER partit_id;
