@@ -1,0 +1,3 @@
+ALTER TABLE PARTITS
+  DROP COLUMN nom_curt_candidatura,
+  DROP COLUMN nom_llarg_candidatura;
