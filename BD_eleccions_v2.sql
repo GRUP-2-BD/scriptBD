@@ -26,6 +26,6 @@ ALTER TABLE eleccions
   Modify column any tinyINT(4) as (YEAR(data))  STORED COMMENT 'any el qual s''han celebrat les eleccions',
   Modify column mes tinyINT(2) as (MONTH(data)) STORED COMMENT 'El mes que s''han celebrat les eleccions';
 
-ALTER TABLE PARTITS
+ALTER TABLE partits
   DROP COLUMN nom_curt_candidatura,
   DROP COLUMN nom_llarg_candidatura;
